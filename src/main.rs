@@ -154,10 +154,24 @@ async fn main() {
     pretty_env_logger::init();
 
     let cors = warp::cors()
-        .allow_methods(&[Method::GET, Method::POST, Method::PATCH, Method::DELETE])
-        .allow_origins(vec!["http://localhost:3000/", "http://localhost:8000/"])
-        .allow_headers(vec!["content-type"])
-        .allow_credentials(true);
+        .allow_any_origin() // Allow requests from any origin
+        // .allow_origin("http://your-react-app-domain.com") // Alternatively, specify your React app's domain
+        .allow_methods(&[Method::POST, Method::GET, Method::OPTIONS])
+        .allow_headers(vec![
+            "Content-Type",
+            "Authorization",
+            "Accept",
+            "Origin",
+            "User-Agent",
+            "DNT",
+            "Cache-Control",
+            "X-Mx-ReqToken",
+            "Keep-Alive",
+            "X-Requested-With",
+            "If-Modified-Since",
+            "X-CSRF-Token",
+        ])
+        .build();
 
     let health_checker = warp::path!("api" / "healthcheck")
         .and(warp::get())
@@ -171,7 +185,6 @@ async fn main() {
     let routes = health_checker
         .with(warp::log("api"))
         .with(cors)
-        .with(warp::log("api"))
         .or(receive_mail);
 
     println!("🚀 Server started successfully");

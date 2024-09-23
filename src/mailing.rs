@@ -1,4 +1,7 @@
-use dusa_collection_utils::{errors::{ErrorArrayItem, Errors}, stringy::Stringy};
+use dusa_collection_utils::{
+    errors::{ErrorArrayItem, Errors},
+    stringy::Stringy,
+};
 use serde::{Deserialize, Serialize};
 use std::{fmt, io::Write, net::TcpStream};
 
@@ -55,7 +58,8 @@ impl EmailSecure {
             ));
         }
 
-        let plain_email_data: Stringy = Stringy::from_string(format!("{}-=-{}", email.subject, email.body));
+        let plain_email_data: Stringy =
+            Stringy::from_string(format!("{}-=-{}", email.subject, email.body));
         let encrypted_data: Stringy = encrypt_text(plain_email_data.to_string()).await?;
 
         Ok(EmailSecure {

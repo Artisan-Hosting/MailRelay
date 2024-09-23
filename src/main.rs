@@ -144,7 +144,6 @@ pub async fn send_mail(email: Email) -> WebResult<impl Reply> {
             }));
         }
     }
-
 }
 
 #[tokio::main]

@@ -1,3 +1,6 @@
+mod dusa;
+mod mailing;
+
 use dusa_collection_utils::{
     errors::{ErrorArray, WarningArray},
     functions::truncate,
@@ -7,9 +10,10 @@ use dusa_common::{
     prefix::{receive_message, send_message},
     MessageType, RequestPayload, RequestRecsPlainText, SOCKET_PATH,
 };
+use mailing::{Email, EmailSecure};
 use serde::Serialize;
 use std::os::unix::net::UnixStream;
-use warp::{reply::json, Filter, Rejection, Reply};
+use warp::{http::Method, reply::json, Filter, Rejection, Reply};
 // filters::body::json,
 
 type WebResult<T> = std::result::Result<T, Rejection>;
@@ -108,12 +112,40 @@ pub async fn health_checker_handler() -> WebResult<impl Reply> {
             return Ok(json(&GenericResponse {
                 status: FAILURE.into(),
                 message: "Dusa not running".to_owned(),
-            }))
+            }));
         }
     }
 }
 
-// pub async fn send_mail(mail_item: )
+pub async fn send_mail(email: Email) -> WebResult<impl Reply> {
+    let encrypted_mail: EmailSecure = match EmailSecure::new(email).await {
+        Ok(d) => d,
+        Err(e) => {
+            ErrorArray::new(vec![e]).display(false);
+            return Ok(json(&GenericResponse {
+                status: FAILURE.into(),
+                message: "Error creating secure email object".to_owned(),
+            }));
+        }
+    };
+
+    match encrypted_mail.send() {
+        Ok(_) => {
+            return Ok(json(&GenericResponse {
+                status: SUCCESS.into(),
+                message: "Email relayed!".to_owned(),
+            }));
+        }
+        Err(e) => {
+            ErrorArray::new(vec![e.clone()]).display(false);
+            return Ok(json(&GenericResponse {
+                status: FAILURE.into(),
+                message: format!("{}", e),
+            }));
+        }
+    }
+
+}
 
 #[tokio::main]
 async fn main() {
@@ -122,15 +154,26 @@ async fn main() {
     }
     pretty_env_logger::init();
 
-    let health_checker = warp::path!("api" / "healthchecker")
+    let cors = warp::cors()
+        .allow_methods(&[Method::GET, Method::POST, Method::PATCH, Method::DELETE])
+        .allow_origins(vec!["http://localhost:3000/", "http://localhost:8000/"])
+        .allow_headers(vec!["content-type"])
+        .allow_credentials(true);
+
+    let health_checker = warp::path!("api" / "healthcheck")
         .and(warp::get())
         .and_then(health_checker_handler);
 
-    // let recieve_mail = warp::path!("api" / "sendmail")
-    //     .and(warp::get())
-    //     .and_then(fun)
+    let receive_mail = warp::path!("api" / "sendmail")
+        .and(warp::post())
+        .and(warp::body::json())
+        .and_then(send_mail);
 
-    let mut routes = health_checker.with(warp::log("api"));
+    let routes = health_checker
+        .with(warp::log("api"))
+        .with(cors)
+        .with(warp::log("api"))
+        .or(receive_mail);
 
     println!("🚀 Server started successfully");
     warp::serve(routes).run(([0, 0, 0, 0], 8000)).await;

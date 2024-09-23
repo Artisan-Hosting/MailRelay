@@ -104,7 +104,7 @@ dependencies = [
 
 [[package]]
 name = "artisan_mail_relay"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "chrono",
  "dusa",

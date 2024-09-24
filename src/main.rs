@@ -186,11 +186,12 @@ async fn main() {
     let receive_mail = warp::path!("api" / "sendmail")
         .and(warp::post())
         .and(warp::body::json())
-        .and_then(send_mail);
+        .and_then(send_mail)
+        .with(cors.clone());
 
     let routes = health_checker
         .with(warp::log("api"))
-        .with(cors)
+        .with(cors.clone())
         .or(receive_mail);
 
     // Build the warp service

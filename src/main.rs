@@ -13,7 +13,7 @@ use hyper::server::conn::Http;
 use mailing::{Email, EmailSecure};
 use rustls_pemfile::{certs, read_one, Item};
 use serde::Serialize;
-use tokio::net::{TcpListener, TcpStream};
+use tokio::net::TcpListener;
 use std::{fs::File, io::BufReader, net::SocketAddr, os::unix::net::UnixStream, sync::Arc};
 use tokio_rustls::{rustls::{Certificate, PrivateKey, ServerConfig
 }, TlsAcceptor};
@@ -173,6 +173,7 @@ async fn main() {
             "X-Mx-ReqToken",
             "Keep-Alive",
             "X-Requested-With",
+            "Access-Control-Allow-Origin",
             "If-Modified-Since",
             "X-CSRF-Token",
         ])

@@ -158,8 +158,9 @@ async fn main() {
     pretty_env_logger::init();
 
     let cors = warp::cors()
-        .allow_any_origin() // Allow requests from any origin
-        // .allow_origin("http://your-react-app-domain.com") // Alternatively, specify your React app's domain
+        // .allow_any_origin() // Allow requests from any origin
+        .allow_origin("https://www.artisanhosting.net") // Alternatively, specify your React app's domain
+        .allow_origin("https://artisanhosting.net") // Alternatively, specify your React app's domain
         .allow_methods(&[Method::POST, Method::GET, Method::OPTIONS])
         .allow_headers(vec![
             "Content-Type",

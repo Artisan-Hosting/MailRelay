@@ -84,6 +84,9 @@ pub async fn health_checker_handler() -> WebResult<impl Reply> {
                 }
             };
 
+			drop(throw_away_errors);
+			drop(throw_away_warning);
+			
             match data.msg_type {
                 MessageType::Response => {
                     let string_data = data
@@ -206,7 +209,7 @@ async fn main() {
 
     let listener = TcpListener::bind(&addr).await.unwrap();
 
-    println!("Server running on https://{}", addr);
+    println!("Server running on https://relay.artisanhosting.net");
 
     loop {
         let (stream, _) = listener.accept().await.unwrap();
@@ -238,8 +241,8 @@ async fn main() {
 // Setup TLS with Rustls
 fn load_rustls_config() -> Result<ServerConfig, Box<dyn std::error::Error>> {
     // Load certificates and private key
-    let cert_file = &mut BufReader::new(File::open("cert.pem")?);
-    let key_file = &mut BufReader::new(File::open("key.pem")?);
+    let cert_file = &mut BufReader::new(File::open("/etc/letsencrypt/live/relay.artisanhosting.net/fullchain.pem")?);
+    let key_file = &mut BufReader::new(File::open("/etc/letsencrypt/live/relay.artisanhosting.net/privkey.pem")?);
 
     // Load certificate chain
     let cert_chain: Vec<Certificate> = certs(cert_file)

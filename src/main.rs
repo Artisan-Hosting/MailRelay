@@ -1,5 +1,4 @@
-mod dusa;
-mod mailing;
+use artisan_middleware::notifications::{Email, EmailSecure};
 use dusa_collection_utils::{
     errors::{ErrorArray, WarningArray},
     functions::truncate,
@@ -10,7 +9,6 @@ use dusa_common::{
     MessageType, RequestPayload, RequestRecsPlainText, SOCKET_PATH,
 };
 use hyper::server::conn::Http;
-use mailing::{Email, EmailSecure};
 use rustls_pemfile::{certs, read_one, Item};
 use serde::Serialize;
 use tokio::net::TcpListener;
@@ -125,7 +123,7 @@ pub async fn health_checker_handler() -> WebResult<impl Reply> {
 }
 
 pub async fn send_mail(email: Email) -> WebResult<impl Reply> {
-    let encrypted_mail: EmailSecure = match EmailSecure::new(email).await {
+    let encrypted_mail: EmailSecure = match EmailSecure::new(email) {
         Ok(d) => d,
         Err(e) => {
             ErrorArray::new(vec![e]).display(false);

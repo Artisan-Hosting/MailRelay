@@ -1,4 +1,4 @@
-const axios = require('axios');
+import { post } from 'axios';
 
 async function sendMail(data) {
     const url = 'https://relay.artisanhosting.net:8000/api/sendmail';
@@ -7,7 +7,7 @@ async function sendMail(data) {
     };
 
     try {
-        const response = await axios.post(url, data, { headers });
+        const response = await post(url, data, { headers });
         let responseData = response.data;
 
         if (typeof responseData === 'string') {

@@ -33,13 +33,13 @@ pub async fn health_checker_handler() -> WebResult<impl Reply> {
 
     return Ok(json(&GenericResponse {
         status: SUCCESS.into(),
-        message: truncate("halo", 6).to_owned(),
+        message: truncate("functional", 6).to_string(),
     }));
 
 }
 
 pub async fn send_mail(email: Email) -> WebResult<impl Reply> {
-    match email.send(None).await {
+    match email.send(None).await.uf_unwrap() {
         Ok(_) => {
             return Ok(json(&GenericResponse {
                 status: SUCCESS.into(),

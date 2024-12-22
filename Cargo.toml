@@ -4,8 +4,8 @@ version = "1.5.1"
 edition = "2021"
 
 [dependencies]
-dusa_collection_utils = "^3.0.0"
-artisan_middleware = "^3.2.0"
+dusa_collection_utils = "3.1.0"
+artisan_middleware = "^4.1.0"
 recs_lib = "^3.0.0"
 #dusa = "1.2.6"
 serde = { version = "1.0.152", features = ["derive"] }

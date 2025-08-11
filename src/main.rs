@@ -1,15 +1,16 @@
-use artisan_middleware::notifications::Email;
 use artisan_middleware::dusa_collection_utils::{
-    core::errors::ErrorArray,
-    core::types::stringy::Stringy,
+    core::errors::ErrorArray, core::types::stringy::Stringy,
 };
+use artisan_middleware::notifications::Email;
 use hyper::server::conn::Http;
 use rustls_pemfile::{certs, read_one, Item};
 use serde::Serialize;
-use tokio::net::TcpListener;
 use std::{fs::File, io::BufReader, net::SocketAddr, sync::Arc};
-use tokio_rustls::{rustls::{Certificate, PrivateKey, ServerConfig
-}, TlsAcceptor};
+use tokio::net::TcpListener;
+use tokio_rustls::{
+    rustls::{Certificate, PrivateKey, ServerConfig},
+    TlsAcceptor,
+};
 use warp::{http::Method, reply::json, Filter, Rejection, Reply};
 // filters::body::json,
 
@@ -29,12 +30,10 @@ pub struct SimpleResponse {
 }
 
 pub async fn health_checker_handler() -> WebResult<impl Reply> {
-
     return Ok(json(&GenericResponse {
         status: SUCCESS.into(),
         message: String::from("functi"),
     }));
-
 }
 
 pub async fn send_mail(email: Email) -> WebResult<impl Reply> {
@@ -129,22 +128,22 @@ async fn main() {
             };
 
             // Serve the connection using Hyper and Warp
-            if let Err(err) = Http::new()
-                .serve_connection(tls_stream, svc)
-                .await
-            {
+            if let Err(err) = Http::new().serve_connection(tls_stream, svc).await {
                 eprintln!("Error serving connection: {:?}", err);
             }
         });
     }
 }
 
-
 // Setup TLS with Rustls
 fn load_rustls_config() -> Result<ServerConfig, Box<dyn std::error::Error>> {
     // Load certificates and private key
-    let cert_file = &mut BufReader::new(File::open("/etc/letsencrypt/live/relay.artisanhosting.net/fullchain.pem")?);
-    let key_file = &mut BufReader::new(File::open("/etc/letsencrypt/live/relay.artisanhosting.net/privkey.pem")?);
+    let cert_file = &mut BufReader::new(File::open(
+        "/etc/nginx/certs/_.artisanhosting.net_acme_client_cert/fullchain.pem",
+    )?);
+    let key_file = &mut BufReader::new(File::open(
+        "/etc/nginx/certs/_.artisanhosting.net_acme_client_cert/privkey.pem",
+    )?);
 
     // Load certificate chain
     let cert_chain: Vec<Certificate> = certs(cert_file)
@@ -165,9 +164,10 @@ fn load_rustls_config() -> Result<ServerConfig, Box<dyn std::error::Error>> {
     Ok(config)
 }
 
-
 // Function to load the private key from a PEM file
-fn load_private_key<R: std::io::Read + std::io::BufRead>(mut reader: R) -> Result<PrivateKey, Box<dyn std::error::Error>> {
+fn load_private_key<R: std::io::Read + std::io::BufRead>(
+    mut reader: R,
+) -> Result<PrivateKey, Box<dyn std::error::Error>> {
     let mut keys = Vec::new();
 
     // Read and process the PEM file items

@@ -1,8 +1,7 @@
 use artisan_middleware::notifications::Email;
-use dusa_collection_utils::{
-    errors::ErrorArray,
-    functions::truncate,
-    stringy::Stringy,
+use artisan_middleware::dusa_collection_utils::{
+    core::errors::ErrorArray,
+    core::types::stringy::Stringy,
 };
 use hyper::server::conn::Http;
 use rustls_pemfile::{certs, read_one, Item};
@@ -33,7 +32,7 @@ pub async fn health_checker_handler() -> WebResult<impl Reply> {
 
     return Ok(json(&GenericResponse {
         status: SUCCESS.into(),
-        message: truncate("functional", 6).to_string(),
+        message: String::from("functi"),
     }));
 
 }
@@ -65,7 +64,6 @@ async fn main() {
     pretty_env_logger::init();
 
     let cors = warp::cors()
-        // .allow_any_origin() // Allow requests from any origin
         .allow_origin("https://www.artisanhosting.net") // Alternatively, specify your React app's domain
         .allow_origin("https://artisanhosting.net") // Alternatively, specify your React app's domain
         .allow_methods(&[Method::POST, Method::GET, Method::OPTIONS])

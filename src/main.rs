@@ -106,7 +106,7 @@ async fn main() {
 
     let acceptor = TlsAcceptor::from(Arc::new(tls_cfg));
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 8000));
 
     let listener = TcpListener::bind(&addr).await.unwrap();
 

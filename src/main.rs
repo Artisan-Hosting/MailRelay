@@ -37,7 +37,7 @@ pub async fn health_checker_handler() -> WebResult<impl Reply> {
 }
 
 pub async fn send_mail(email: Email) -> WebResult<impl Reply> {
-    match email.send(None).await.uf_unwrap() {
+    match email.send(Some("127.0.0.1:1827")).await.uf_unwrap() {
         Ok(_) => {
             return Ok(json(&GenericResponse {
                 status: SUCCESS.into(),
@@ -138,12 +138,10 @@ async fn main() {
 // Setup TLS with Rustls
 fn load_rustls_config() -> Result<ServerConfig, Box<dyn std::error::Error>> {
     // Load certificates and private key
-    let cert_file = &mut BufReader::new(File::open(
-        "/etc/nginx/certs/_.artisanhosting.net/rsa.pem",
-    )?);
-    let key_file = &mut BufReader::new(File::open(
-        "/etc/nginx/certs/_.artisanhosting.net/rsa.key",
-    )?);
+    let cert_file =
+        &mut BufReader::new(File::open("/etc/nginx/certs/_.artisanhosting.net/rsa.pem")?);
+    let key_file =
+        &mut BufReader::new(File::open("/etc/nginx/certs/_.artisanhosting.net/rsa.key")?);
 
     // Load certificate chain
     let cert_chain: Vec<Certificate> = certs(cert_file)

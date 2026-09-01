@@ -141,9 +141,9 @@ async fn main() {
 fn load_rustls_config() -> Result<ServerConfig, Box<dyn std::error::Error>> {
     // Load certificates and private key
     let cert_file =
-        &mut BufReader::new(File::open("/etc/nginx/certs/_.artisanhosting.net/rsa.pem")?);
+        &mut BufReader::new(File::open("artisanhosting.pem")?);
     let key_file =
-        &mut BufReader::new(File::open("/etc/nginx/certs/_.artisanhosting.net/rsa.key")?);
+        &mut BufReader::new(File::open("artisanhosting.key")?);
 
     // Load certificate chain
     let cert_chain: Vec<Certificate> = certs(cert_file)

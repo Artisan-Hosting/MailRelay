@@ -37,7 +37,7 @@ pub async fn health_checker_handler() -> WebResult<impl Reply> {
 }
 
 pub async fn send_mail(email: Email) -> WebResult<impl Reply> {
-    match email.send(Some("127.0.0.1:1827")).await.uf_unwrap() {
+    match email.send(Some("127.0.0.1:1827")).await {
         Ok(_) => {
             return Ok(json(&GenericResponse {
                 status: SUCCESS.into(),
@@ -65,6 +65,8 @@ async fn main() {
     let cors = warp::cors()
         .allow_origin("https://www.artisanhosting.net") // Alternatively, specify your React app's domain
         .allow_origin("https://artisanhosting.net") // Alternatively, specify your React app's domain
+        .allow_origin("https://www.makasecurity.com") // Alternatively, specify your React app's domain
+        .allow_origin("https://makasecurity.com") // Alternatively, specify your React app's domain
         .allow_methods(&[Method::POST, Method::GET, Method::OPTIONS])
         .allow_headers(vec![
             "Content-Type",

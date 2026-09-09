@@ -1,7 +1,4 @@
-use artisan_middleware::dusa_collection_utils::{
-    core::errors::ErrorArray, core::types::stringy::Stringy,
-};
-use artisan_middleware::notifications::Email;
+use apostle_client::{Email, MailBundle, dusa_collection_utils::core::{errors::ErrorArray, types::{pathtype::PathType, stringy::Stringy}}};
 use hyper::server::conn::Http;
 use rustls_pemfile::{certs, read_one, Item};
 use serde::Serialize;
@@ -18,6 +15,7 @@ type WebResult<T> = std::result::Result<T, Rejection>;
 
 const SUCCESS: &str = "success";
 const FAILURE: &str = "failed";
+const BUNDLE_PATH: &str = "/etc/MailRelay/apostle@artisanhosting.net.acai";
 
 #[derive(Serialize)]
 pub struct GenericResponse {
@@ -36,8 +34,8 @@ pub async fn health_checker_handler() -> WebResult<impl Reply> {
     }));
 }
 
-pub async fn send_mail(email: Email) -> WebResult<impl Reply> {
-    match email.send(Some("127.0.0.1:1827")).await {
+pub async fn send_mail(email: Email, config: Arc<MailBundle>) -> WebResult<impl Reply> {
+    match email.send(&config).await {
         Ok(_) => {
             return Ok(json(&GenericResponse {
                 status: SUCCESS.into(),
@@ -61,6 +59,14 @@ async fn main() {
     }
 
     pretty_env_logger::init();
+
+    let bundle: Arc<MailBundle> = match load_apostle_bundle() {
+        Ok(data) => Arc::new(data),
+        Err(err) => {
+            eprintln!("Failed to load the apostle keys: {}", err);
+            std::process::exit(100);
+        },
+    };
 
     let cors = warp::cors()
         .allow_origin("https://www.artisanhosting.net") // Alternatively, specify your React app's domain
@@ -92,6 +98,7 @@ async fn main() {
     let receive_mail = warp::path!("api" / "sendmail")
         .and(warp::post())
         .and(warp::body::json())
+        .and(warp::any().map(move || bundle.clone()))
         .and_then(send_mail)
         .with(cors.clone());
 
@@ -108,7 +115,7 @@ async fn main() {
 
     let acceptor = TlsAcceptor::from(Arc::new(tls_cfg));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8000));
 
     let listener = TcpListener::bind(&addr).await.unwrap();
 
@@ -135,6 +142,11 @@ async fn main() {
             }
         });
     }
+}
+
+// load apostle backend keys
+fn load_apostle_bundle() -> Result<MailBundle, Box<dyn std::error::Error>> {
+        Ok(MailBundle::load(&PathType::Str(BUNDLE_PATH.into()))?)
 }
 
 // Setup TLS with Rustls
